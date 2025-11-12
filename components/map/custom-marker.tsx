@@ -10,14 +10,33 @@ if (typeof window !== 'undefined') {
 }
 
 // Custom marker icons for different user states
-export function createUserMarkerIcon(isOnline: boolean, initials: string, color: string = "#3b82f6") {
+export function createUserMarkerIcon(isOnline: boolean, initials: string, color: string = "#3b82f6", avatar?: string) {
   if (!L) return null;
+  
   const iconHtml = renderToString(
-    <div className={`relative flex items-center justify-center w-8 h-8 rounded-full text-white font-medium text-sm shadow-lg ${isOnline ? 'animate-pulse' : ''}`} 
-         style={{ backgroundColor: color }}>
-      {initials}
-      {isOnline && (
-        <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+    <div className={`relative flex items-center justify-center w-10 h-10 rounded-full shadow-lg ${isOnline ? 'ring-2 ring-green-500' : 'ring-2 ring-gray-300'}`}>
+      {avatar ? (
+        <>
+          <img 
+            src={avatar} 
+            alt={initials}
+            className="w-10 h-10 rounded-full object-cover"
+            style={{ border: '2px solid white' }}
+          />
+          {isOnline && (
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
+          )}
+        </>
+      ) : (
+        <>
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-medium text-sm`} 
+               style={{ backgroundColor: color }}>
+            {initials}
+          </div>
+          {isOnline && (
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+          )}
+        </>
       )}
     </div>
   );
@@ -25,9 +44,9 @@ export function createUserMarkerIcon(isOnline: boolean, initials: string, color:
   return L.divIcon({
     html: iconHtml,
     className: 'custom-user-marker',
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
-    popupAnchor: [0, -16],
+    iconSize: [40, 40],
+    iconAnchor: [20, 20],
+    popupAnchor: [0, -20],
   });
 }
 

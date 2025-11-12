@@ -101,9 +101,10 @@ function MapControls({
   );
 }
 
-function getTimeAgo(date: Date): string {
+function getTimeAgo(date: Date | string): string {
   const now = new Date();
-  const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const diffInMinutes = Math.floor((now.getTime() - dateObj.getTime()) / (1000 * 60));
   
   if (diffInMinutes < 1) return "Just now";
   if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
@@ -174,23 +175,46 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
             mapRef.current.setView([latitude, longitude], 10);
           }
 
-          // Update location via current connection method (WebSocket or REST)
+          // Update location with reverse geocoding
           try {
-            // For demo, we'll use a reverse geocoding service or mock data
-            const locationData = {
-              coordinates: { latitude, longitude },
-              address: {
-                city: "Current City", // In production, use reverse geocoding
-                country: "Current Country",
-                countryCode: "CC"
-              },
-              accuracy: position.coords.accuracy
-            };
+            let locationData;
+            
+            // Try to get actual location data using reverse geocoding
+            try {
+              const reverseGeoResponse = await fetch(
+                `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+              );
+              
+              if (reverseGeoResponse.ok) {
+                const geoData = await reverseGeoResponse.json();
+                locationData = {
+                  coordinates: { latitude, longitude },
+                  address: {
+                    city: geoData.city || geoData.locality || geoData.principalSubdivision || "Unknown City",
+                    country: geoData.countryName || "Unknown Country", 
+                    countryCode: geoData.countryCode || "XX"
+                  },
+                  accuracy: position.coords.accuracy
+                };
+                console.log('Reverse geocoding successful:', geoData);
+              } else {
+                throw new Error('Reverse geocoding failed');
+              }
+            } catch (geoError) {
+              console.log('Reverse geocoding failed, using coordinates-based location');
+              // Fallback: Determine location based on coordinates
+              const { city, country, countryCode } = getLocationFromCoordinates(latitude, longitude);
+              locationData = {
+                coordinates: { latitude, longitude },
+                address: { city, country, countryCode },
+                accuracy: position.coords.accuracy
+              };
+            }
 
             // Use the updateLocation method from current hook (WebSocket or fallback)
             await updateLocation(locationData);
             
-            console.log('Location updated successfully');
+            console.log('Location updated successfully:', locationData);
           } catch (error) {
             console.error('Failed to update location:', error);
           }
@@ -216,7 +240,12 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
   const focusOnUser = (userId: string) => {
     const userLocation = userLocations.find(ul => ul.userId === userId);
     if (userLocation && mapRef.current) {
-      mapRef.current.setView(userLocation.location.coordinates, 8);
+      const coords = userLocation.location.coordinates;
+      const position: [number, number] = Array.isArray(coords) 
+        ? [coords[0], coords[1]]
+        : [(coords as any).latitude, (coords as any).longitude];
+      
+      mapRef.current.setView(position, 8);
       setSelectedUser(userId);
       
       // Clear selection after 3 seconds
@@ -238,6 +267,49 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
       'Default': '#f97316' // orange
     };
     return colors[continent as keyof typeof colors] || colors.Default;
+  };
+
+  // Function to determine location from coordinates (fallback)
+  const getLocationFromCoordinates = (lat: number, lng: number) => {
+    // Major cities/regions based on coordinates
+    if (lat > 40.5 && lat < 40.9 && lng > -74.2 && lng < -73.7) {
+      return { city: "New York", country: "United States", countryCode: "US" };
+    }
+    if (lat > 51.3 && lat < 51.7 && lng > -0.3 && lng < 0.2) {
+      return { city: "London", country: "United Kingdom", countryCode: "GB" };
+    }
+    if (lat > 35.4 && lat < 35.9 && lng > 139.4 && lng < 139.9) {
+      return { city: "Tokyo", country: "Japan", countryCode: "JP" };
+    }
+    if (lat > 48.7 && lat < 49.0 && lng > 2.1 && lng < 2.5) {
+      return { city: "Paris", country: "France", countryCode: "FR" };
+    }
+    if (lat > 14.3 && lat < 14.8 && lng > 120.8 && lng < 121.2) {
+      return { city: "Manila", country: "Philippines", countryCode: "PH" };
+    }
+    if (lat > 9.5 && lat < 10.0 && lng > 118.5 && lng < 119.0) {
+      return { city: "Puerto Princesa", country: "Philippines", countryCode: "PH" };
+    }
+    
+    // General region detection
+    if (lat > 30 && lng > -130 && lng < -60) {
+      return { city: "North America", country: "United States", countryCode: "US" };
+    }
+    if (lat > 35 && lng > -10 && lng < 70) {
+      return { city: "Europe", country: "Europe", countryCode: "EU" };
+    }
+    if (lat > -10 && lng > 70 && lng < 180) {
+      return { city: "Asia", country: "Asia", countryCode: "AS" };
+    }
+    if (lat < -10 && lng > 110 && lng < 180) {
+      return { city: "Australia", country: "Australia", countryCode: "AU" };
+    }
+    
+    return { 
+      city: `${lat.toFixed(2)}°, ${lng.toFixed(2)}°`, 
+      country: "Unknown Region", 
+      countryCode: "XX" 
+    };
   };
 
   const getContinent = (coordinates: [number, number] | { latitude: number; longitude: number }): string => {
@@ -280,76 +352,143 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           
-          {/* Real-time User Markers */}
-          {filteredLocations.map((userLocation) => {
-            const coords = userLocation.location.coordinates;
-            const position: [number, number] = Array.isArray(coords) 
-              ? [coords[0], coords[1]]
-              : [(coords as any).latitude, (coords as any).longitude];
+          {/* Smart Positioned User Markers */}
+          {(() => {
+            // Group users by location to handle overlaps
+            const positionedUsers = [];
+            const processed = new Set();
+            
+            filteredLocations.forEach((userLocation, index) => {
+              if (processed.has(userLocation.userId)) return;
               
-            return (
-            <Marker
-              key={userLocation.userId}
-              position={position}
-              icon={createUserMarkerIcon(
-                userLocation.isOnline, 
-                getInitials(userLocation.userName),
-                getMarkerColor(userLocation)
-              )}
-              eventHandlers={{
-                click: () => focusOnUser(userLocation.userId),
-              }}
-            >
-              <Popup>
-                <div className="p-3 min-w-[220px]">
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className="relative">
-                      <div className="h-12 w-12 rounded-full flex items-center justify-center font-medium text-white text-sm"
-                           style={{ backgroundColor: getMarkerColor(userLocation) }}>
-                        {getInitials(userLocation.userName)}
+              const coords = userLocation.location.coordinates;
+              const basePosition: [number, number] = Array.isArray(coords) 
+                ? [coords[0], coords[1]]
+                : [(coords as any).latitude, (coords as any).longitude];
+              
+              // Find other users at the same location (within 100m)
+              const sameLocationUsers = filteredLocations.filter((other, otherIndex) => {
+                if (otherIndex === index || processed.has(other.userId)) return false;
+                
+                const otherCoords = other.location.coordinates;
+                const otherPosition: [number, number] = Array.isArray(otherCoords) 
+                  ? [otherCoords[0], otherCoords[1]]
+                  : [(otherCoords as any).latitude, (otherCoords as any).longitude];
+                
+                // Check if within ~100m (0.001 degrees ≈ 100m)
+                const latDiff = Math.abs(basePosition[0] - otherPosition[0]);
+                const lngDiff = Math.abs(basePosition[1] - otherPosition[1]);
+                return latDiff < 0.001 && lngDiff < 0.001;
+              });
+              
+              if (sameLocationUsers.length === 0) {
+                // Single user at this location
+                positionedUsers.push({
+                  ...userLocation,
+                  adjustedPosition: basePosition
+                });
+                processed.add(userLocation.userId);
+              } else {
+                // Multiple users - arrange in circle
+                const allUsers = [userLocation, ...sameLocationUsers];
+                const radius = 0.0008; // Small offset in degrees
+                
+                allUsers.forEach((user, i) => {
+                  const angle = (2 * Math.PI * i) / allUsers.length;
+                  const offsetLat = Math.sin(angle) * radius;
+                  const offsetLng = Math.cos(angle) * radius;
+                  
+                  positionedUsers.push({
+                    ...user,
+                    adjustedPosition: [
+                      basePosition[0] + offsetLat, 
+                      basePosition[1] + offsetLng
+                    ] as [number, number]
+                  });
+                  processed.add(user.userId);
+                });
+              }
+            });
+            
+            return positionedUsers.map((userLocation) => (
+              <Marker
+                key={userLocation.userId}
+                position={userLocation.adjustedPosition}
+                icon={createUserMarkerIcon(
+                  userLocation.isOnline, 
+                  getInitials(userLocation.userName),
+                  getMarkerColor(userLocation),
+                  userLocation.userAvatar
+                )}
+                eventHandlers={{
+                  click: () => focusOnUser(userLocation.userId),
+                }}
+              >
+                <Popup>
+                  <div className="p-3 min-w-[220px]">
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="relative">
+                        {userLocation.userAvatar ? (
+                          <>
+                            <img 
+                              src={userLocation.userAvatar} 
+                              alt={userLocation.userName}
+                              className="h-12 w-12 rounded-full object-cover border-2 border-white shadow-md"
+                            />
+                            {userLocation.isOnline && (
+                              <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-green-500 ring-2 ring-white animate-pulse" />
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <div className="h-12 w-12 rounded-full flex items-center justify-center font-medium text-white text-sm"
+                                 style={{ backgroundColor: getMarkerColor(userLocation) }}>
+                              {getInitials(userLocation.userName)}
+                            </div>
+                            {userLocation.isOnline && (
+                              <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-green-500 ring-2 ring-white animate-pulse" />
+                            )}
+                          </>
+                        )}
                       </div>
-                      {userLocation.isOnline && (
-                        <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-green-500 ring-2 ring-white animate-pulse" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm">{userLocation.userName}</p>
+                        <Badge 
+                          variant={userLocation.isOnline ? "default" : "secondary"} 
+                          className="text-xs mt-1"
+                        >
+                          {userLocation.isOnline ? "🟢 Online" : "⚫ Away"}
+                        </Badge>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2 border-t pt-2">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-3 w-3 text-muted-foreground" />
+                        <span className="text-sm font-medium">
+                          {userLocation.location.address.city}, {userLocation.location.address.country}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">Last seen:</span>
+                        <span className="text-xs">{getTimeAgo(userLocation.lastSeen)}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">Region:</span>
+                        <span className="text-xs">{getContinent(userLocation.location.coordinates)}</span>
+                      </div>
+                      {userLocation.location.accuracy && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">Accuracy:</span>
+                          <span className="text-xs">~{Math.round(userLocation.location.accuracy)}m</span>
+                        </div>
                       )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm">{userLocation.userName}</p>
-                      <Badge 
-                        variant={userLocation.isOnline ? "default" : "secondary"} 
-                        className="text-xs mt-1"
-                      >
-                        {userLocation.isOnline ? "🟢 Online" : "⚫ Away"}
-                      </Badge>
-                    </div>
                   </div>
-                  
-                  <div className="space-y-2 border-t pt-2">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-3 w-3 text-muted-foreground" />
-                      <span className="text-sm font-medium">
-                        {userLocation.location.address.city}, {userLocation.location.address.country}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">Last seen:</span>
-                      <span className="text-xs">{getTimeAgo(userLocation.lastSeen)}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">Region:</span>
-                      <span className="text-xs">{getContinent(userLocation.location.coordinates)}</span>
-                    </div>
-                    {userLocation.location.accuracy && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">Accuracy:</span>
-                        <span className="text-xs">~{Math.round(userLocation.location.accuracy)}m</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </Popup>
-            </Marker>
-            );
-          })}
+                </Popup>
+              </Marker>
+            ));
+          })()}
 
           {/* User's current location */}
           {userLocation && (

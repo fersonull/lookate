@@ -47,32 +47,65 @@ export class MongooseLocationRepository implements LocationRepository {
     // Find locations with users who have been active in the last 30 minutes
     const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
     
-    const locations = await LocationModel.aggregate([
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'userId',
-          foreignField: '_id',
-          as: 'user'
-        }
-      },
-      {
-        $unwind: '$user'
-      },
-      {
-        $match: {
-          'user.updatedAt': { $gte: thirtyMinutesAgo }
-        }
-      },
-      {
-        $sort: { timestamp: -1 }
-      },
-      {
-        $limit: limit
-      }
-    ]);
+    try {
+      // First, let's check what locations exist
+      const allLocations = await LocationModel.find().limit(10);
+      console.log('Total locations in DB:', await LocationModel.countDocuments());
+      console.log('Sample locations:', allLocations.map(l => ({ userId: l.userId, timestamp: l.timestamp })));
 
-    return locations.map(this.mapToUserLocation);
+      const locations = await LocationModel.aggregate([
+        {
+          $addFields: {
+            userObjectId: { $toObjectId: '$userId' }
+          }
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userObjectId',
+            foreignField: '_id',
+            as: 'user'
+          }
+        },
+        {
+          $unwind: {
+            path: '$user',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $match: {
+            user: { $exists: true },
+            $or: [
+              { 'user.updatedAt': { $gte: thirtyMinutesAgo } },
+              { 'timestamp': { $gte: thirtyMinutesAgo } }
+            ]
+          }
+        },
+        {
+          $sort: { timestamp: -1 }
+        },
+        {
+          $limit: limit
+        }
+      ]);
+
+      console.log('Found active user locations:', locations.length);
+      console.log('Sample location data:', locations[0] ? {
+        userId: locations[0].userId,
+        hasUser: !!locations[0].user,
+        userName: locations[0].user?.name,
+        coordinates: locations[0].coordinates,
+        rawCoordinates: JSON.stringify(locations[0].coordinates)
+      } : 'No locations');
+      
+      const mapped = locations.map(this.mapToUserLocation.bind(this));
+      console.log('Mapped to UserLocation objects:', mapped.length);
+      return mapped;
+    } catch (error) {
+      console.error('Error in findActiveUserLocations:', error);
+      return [];
+    }
   }
 
   async findUserLocationsInRadius(

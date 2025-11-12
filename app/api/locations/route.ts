@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
       userLocations = await locationRepository.findActiveUserLocations(limit);
     }
 
+    console.log('API returning user locations:', userLocations);
     return NextResponse.json({
       success: true,
       data: userLocations,

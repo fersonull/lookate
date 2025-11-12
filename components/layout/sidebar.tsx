@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,9 +25,10 @@ interface ActiveUser {
 
 // Real data will be loaded from API
 
-function getTimeAgo(date: Date): string {
+function getTimeAgo(date: Date | string): string {
   const now = new Date();
-  const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const diffInMinutes = Math.floor((now.getTime() - dateObj.getTime()) / (1000 * 60));
   
   if (diffInMinutes < 1) return "Just now";
   if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
@@ -48,6 +50,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ className, onUserSelect }: SidebarProps) {
+  const { data: session } = useSession();
   const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -60,20 +63,42 @@ export function Sidebar({ className, onUserSelect }: SidebarProps) {
         const response = await fetch('/api/locations');
         if (response.ok) {
           const data = await response.json();
-          const users: ActiveUser[] = data.data.map((userLocation: any) => ({
-            id: userLocation.userId,
-            name: userLocation.userName,
-            email: userLocation.userEmail || 'No email',
-            avatar: userLocation.userAvatar,
-            location: {
-              city: userLocation.location.address.city,
-              country: userLocation.location.address.country,
-              coordinates: userLocation.location.coordinates
-            },
-            lastSeen: new Date(userLocation.lastSeen),
-            isOnline: userLocation.isOnline
-          }));
-          setActiveUsers(users);
+          console.log('Sidebar received data:', data);
+          
+          if (data.data && Array.isArray(data.data)) {
+            const allUsers: ActiveUser[] = data.data.map((userLocation: any) => ({
+              id: userLocation.userId,
+              name: userLocation.userName || 'Unknown User',
+              email: userLocation.userEmail || 'No email',
+              avatar: userLocation.userAvatar,
+              location: {
+                city: userLocation.location?.address?.city || 'Unknown City',
+                country: userLocation.location?.address?.country || 'Unknown Country',
+                coordinates: userLocation.location?.coordinates || [0, 0]
+              },
+              lastSeen: userLocation.lastSeen,
+              isOnline: userLocation.isOnline
+            }));
+            
+            // Get current user info
+            const currentUserId = (session?.user as any)?.id;
+            const currentUserEmail = session?.user?.email;
+            
+            // Filter out the current user from the sidebar
+            const otherUsers = allUsers.filter(user => {
+              // Compare by user ID or email to exclude current user
+              return user.id !== currentUserId && user.email !== currentUserEmail;
+            });
+            
+            console.log('All users:', allUsers.length);
+            console.log('Other users (excluding self):', otherUsers.length);
+            console.log('Current user ID/Email:', currentUserId, currentUserEmail);
+            
+            setActiveUsers(otherUsers);
+          } else {
+            console.log('No data.data array found:', data);
+            setActiveUsers([]);
+          }
         } else {
           setError('Failed to load users');
         }
@@ -147,7 +172,7 @@ export function Sidebar({ className, onUserSelect }: SidebarProps) {
           ) : activeUsers.length === 0 ? (
             <Card className="p-4">
               <p className="text-sm text-muted-foreground text-center">
-                No active users found. Be the first to share your location!
+                No other users online. Share your location to see others!
               </p>
             </Card>
           ) : (
