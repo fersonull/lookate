@@ -21,7 +21,13 @@ export function createUserMarkerIcon(isOnline: boolean, initials: string, color:
             src={avatar} 
             alt={initials}
             className="w-10 h-10 rounded-full object-cover"
-            style={{ border: '2px solid white' }}
+            style={{ 
+              border: '2px solid white',
+              borderRadius: '50%',
+              width: '40px',
+              height: '40px',
+              objectFit: 'cover'
+            }}
           />
           {isOnline && (
             <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>

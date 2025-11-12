@@ -434,6 +434,12 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
                               src={userLocation.userAvatar} 
                               alt={userLocation.userName}
                               className="h-12 w-12 rounded-full object-cover border-2 border-white shadow-md"
+                              style={{ 
+                                borderRadius: '50%',
+                                width: '48px',
+                                height: '48px',
+                                objectFit: 'cover'
+                              }}
                             />
                             {userLocation.isOnline && (
                               <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-green-500 ring-2 ring-white animate-pulse" />

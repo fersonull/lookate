@@ -43,6 +43,19 @@
   background: hsl(var(--background)) !important;
 }
 
+/* Ensure all avatars are perfectly circular */
+.custom-user-marker img {
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
+  object-fit: cover !important;
+  border: 2px solid white !important;
+}
+
+.custom-user-marker div {
+  border-radius: 50% !important;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
