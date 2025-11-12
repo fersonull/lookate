@@ -148,6 +148,7 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
   // Handle external user selection from sidebar
   useEffect(() => {
     if (selectedUserId) {
+      console.log('Focusing on user from sidebar:', selectedUserId);
       focusOnUser(selectedUserId);
     }
   }, [selectedUserId]);
@@ -238,18 +239,29 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
   };
 
   const focusOnUser = (userId: string) => {
+    console.log('focusOnUser called with userId:', userId);
+    console.log('Available userLocations:', userLocations.map(ul => ({ id: ul.userId, name: ul.userName })));
+    
     const userLocation = userLocations.find(ul => ul.userId === userId);
+    console.log('Found userLocation:', userLocation ? userLocation.userName : 'Not found');
+    
     if (userLocation && mapRef.current) {
       const coords = userLocation.location.coordinates;
       const position: [number, number] = Array.isArray(coords)
         ? [coords[0], coords[1]]
         : [(coords as any).latitude, (coords as any).longitude];
 
-      mapRef.current.setView(position, 8);
+      console.log('Setting map view to position:', position);
+      mapRef.current.setView(position, 12); // Increased zoom level for better visibility
       setSelectedUser(userId);
 
-      // Clear selection after 3 seconds
-      setTimeout(() => setSelectedUser(null), 3000);
+      // Clear selection after 5 seconds (increased time)
+      setTimeout(() => setSelectedUser(null), 5000);
+    } else {
+      console.log('Cannot focus - userLocation or mapRef not available:', {
+        userLocationFound: !!userLocation,
+        mapRefCurrent: !!mapRef.current
+      });
     }
   };
 
