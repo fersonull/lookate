@@ -77,7 +77,7 @@ export function ProfileModal({ isOpen, onOpenChange }: ProfileModalProps) {
       if (response.ok) {
         setMessage({ type: 'success', text: 'Profile updated successfully!' });
         setProfileData(data.user);
-        
+
         // Update NextAuth session
         await update({
           name: data.user.name,
@@ -117,7 +117,7 @@ export function ProfileModal({ isOpen, onOpenChange }: ProfileModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] z-[10002] bg-background border shadow-xl opacity-100 backdrop-blur-none">
+      <DialogContent className="sm:max-w-[500px] z-10002 bg-background border shadow-xl opacity-100 backdrop-blur-none">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
@@ -146,21 +146,19 @@ export function ProfileModal({ isOpen, onOpenChange }: ProfileModalProps) {
           <form onSubmit={handleSave} className="space-y-6">
             {/* Message */}
             {message && (
-              <div className={`flex items-center gap-2 p-3 rounded-lg ${
-                message.type === 'success' 
-                  ? 'bg-green-50 border border-green-200 dark:bg-green-950 dark:border-green-800' 
-                  : 'bg-red-50 border border-red-200 dark:bg-red-950 dark:border-red-800'
-              }`}>
+              <div className={`flex items-center gap-2 p-3 rounded-lg ${message.type === 'success'
+                ? 'bg-green-50 border border-green-200 dark:bg-green-950 dark:border-green-800'
+                : 'bg-red-50 border border-red-200 dark:bg-red-950 dark:border-red-800'
+                }`}>
                 {message.type === 'success' ? (
                   <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                 ) : (
                   <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
                 )}
-                <p className={`text-sm ${
-                  message.type === 'success' 
-                    ? 'text-green-600 dark:text-green-400' 
-                    : 'text-red-600 dark:text-red-400'
-                }`}>
+                <p className={`text-sm ${message.type === 'success'
+                  ? 'text-green-600 dark:text-green-400'
+                  : 'text-red-600 dark:text-red-400'
+                  }`}>
                   {message.text}
                 </p>
               </div>

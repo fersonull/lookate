@@ -25,7 +25,7 @@ interface UserMarker {
 const mockUserLocations: UserMarker[] = [
   {
     id: "1",
-    name: "Alice Johnson", 
+    name: "Alice Johnson",
     location: {
       city: "New York",
       country: "USA",
@@ -37,7 +37,7 @@ const mockUserLocations: UserMarker[] = [
     id: "2",
     name: "Bob Smith",
     location: {
-      city: "London", 
+      city: "London",
       country: "UK",
       coordinates: [51.5074, -0.1278]
     },
@@ -48,7 +48,7 @@ const mockUserLocations: UserMarker[] = [
     name: "Carol Wilson",
     location: {
       city: "Tokyo",
-      country: "Japan", 
+      country: "Japan",
       coordinates: [35.6762, 139.6503]
     },
     isOnline: true
@@ -64,7 +64,7 @@ export function MapPlaceholder({ selectedUserId }: MapPlaceholderProps) {
   const [useRealTime, setUseRealTime] = useState(false);
 
   if (showInteractiveMap) {
-    return useRealTime 
+    return useRealTime
       ? <RealTimeMap selectedUserId={selectedUserId} />
       : <InteractiveMap selectedUserId={selectedUserId} />;
   }
@@ -72,7 +72,7 @@ export function MapPlaceholder({ selectedUserId }: MapPlaceholderProps) {
   return (
     <div className="relative h-full w-full bg-muted/30 rounded-lg overflow-hidden">
       {/* Map Container */}
-      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-50 to-green-50 dark:from-blue-950 dark:to-green-950">
+      <div className="absolute inset-0 flex items-center justify-center bg-linear-to-br from-blue-50 to-green-50 dark:from-blue-950 dark:to-green-950">
         <div className="text-center">
           <div className="mb-4 relative">
             <MapPin className="h-12 w-12 text-primary mx-auto animate-pulse" />
@@ -90,7 +90,7 @@ export function MapPlaceholder({ selectedUserId }: MapPlaceholderProps) {
               {mockUserLocations.length} users tracked
             </Badge>
             <div className="flex flex-col gap-2">
-              <Button 
+              <Button
                 onClick={() => {
                   setUseRealTime(true);
                   setShowInteractiveMap(true);
@@ -100,7 +100,7 @@ export function MapPlaceholder({ selectedUserId }: MapPlaceholderProps) {
                 <MapPin className="h-4 w-4" />
                 Launch Real-Time Map
               </Button>
-              <Button 
+              <Button
                 variant="outline"
                 onClick={() => {
                   setUseRealTime(false);

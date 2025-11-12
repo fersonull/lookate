@@ -72,7 +72,7 @@ export function AuthModal({ isOpen, onOpenChange }: AuthModalProps) {
     e.preventDefault();
     setIsLoading(true);
     clearErrors();
-    
+
     try {
       if (isLogin) {
         // Handle sign in with NextAuth
@@ -85,7 +85,7 @@ export function AuthModal({ isOpen, onOpenChange }: AuthModalProps) {
 
         if (result?.error) {
           console.error("Sign in error:", result.error);
-          
+
           // Parse different error types
           if (result.error === "CredentialsSignin") {
             setErrors({
@@ -150,11 +150,11 @@ export function AuthModal({ isOpen, onOpenChange }: AuthModalProps) {
           }
         } else {
           console.error("Sign up error:", data.error);
-          
+
           // Handle validation errors
           if (data.details) {
             setValidationErrors(data.details);
-            
+
             // Extract specific field errors
             const newErrors: any = {};
             if (data.details.name?._errors?.length > 0) {
@@ -190,7 +190,7 @@ export function AuthModal({ isOpen, onOpenChange }: AuthModalProps) {
         general: "Network error. Please check your connection and try again."
       });
     }
-    
+
     setIsLoading(false);
   };
 
@@ -199,7 +199,7 @@ export function AuthModal({ isOpen, onOpenChange }: AuthModalProps) {
       ...prev,
       [field]: value
     }));
-    
+
     // Clear field error when user starts typing
     if (errors[field as keyof typeof errors]) {
       setErrors(prev => ({
@@ -211,25 +211,25 @@ export function AuthModal({ isOpen, onOpenChange }: AuthModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[425px] z-[10002] bg-background border shadow-xl opacity-100 backdrop-blur-none">
+      <DialogContent className="sm:max-w-[425px] z-10002 bg-background border shadow-xl opacity-100 backdrop-blur-none">
         <DialogHeader>
           <div className="flex items-center gap-2 mb-2">
             <MapPin className="h-6 w-6 text-primary" />
             <DialogTitle className="text-2xl">lookate</DialogTitle>
           </div>
           <DialogDescription>
-            {isLogin 
-              ? "Sign in to see where your team members are located" 
+            {isLogin
+              ? "Sign in to see where your team members are located"
               : "Join lookate to share your location with your team"
             }
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           {/* Success Message */}
           {successMessage && (
             <div className="flex items-start gap-2 p-3 rounded-lg bg-green-50 border border-green-200 dark:bg-green-950 dark:border-green-800">
-              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
               <p className="text-sm text-green-600 dark:text-green-400">{successMessage}</p>
             </div>
           )}
@@ -326,9 +326,9 @@ export function AuthModal({ isOpen, onOpenChange }: AuthModalProps) {
             </div>
           )}
 
-          <Button 
-            type="submit" 
-            className="w-full" 
+          <Button
+            type="submit"
+            className="w-full"
             disabled={isLoading || !!successMessage}
           >
             {isLoading ? (
@@ -353,8 +353,8 @@ export function AuthModal({ isOpen, onOpenChange }: AuthModalProps) {
               onClick={toggleAuthMode}
               className="text-sm"
             >
-              {isLogin 
-                ? "Don't have an account? Sign up" 
+              {isLogin
+                ? "Don't have an account? Sign up"
                 : "Already have an account? Sign in"
               }
             </Button>

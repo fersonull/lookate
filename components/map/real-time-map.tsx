@@ -34,12 +34,12 @@ interface RealTimeMapProps {
 }
 
 // Map Controls Component
-function MapControls({ 
-  onRefresh, 
-  onLocate, 
-  onFilter, 
-  isRefreshing, 
-  isConnected 
+function MapControls({
+  onRefresh,
+  onLocate,
+  onFilter,
+  isRefreshing,
+  isConnected
 }: {
   onRefresh: () => void;
   onLocate: () => void;
@@ -48,7 +48,7 @@ function MapControls({
   isConnected: boolean;
 }) {
   return (
-    <div className="absolute top-4 right-4 flex flex-col gap-2 z-[1000]">
+    <div className="absolute top-4 right-4 flex flex-col gap-2 z-1000">
       <Card className={`p-2 ${isConnected ? 'bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800' : 'bg-red-50 border-red-200 dark:bg-red-950 dark:border-red-800'}`}>
         <CardContent className="p-0 flex items-center gap-2">
           {isConnected ? (
@@ -105,13 +105,13 @@ function getTimeAgo(date: Date | string): string {
   const now = new Date();
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   const diffInMinutes = Math.floor((now.getTime() - dateObj.getTime()) / (1000 * 60));
-  
+
   if (diffInMinutes < 1) return "Just now";
   if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-  
+
   const diffInHours = Math.floor(diffInMinutes / 60);
   if (diffInHours < 24) return `${diffInHours}h ago`;
-  
+
   const diffInDays = Math.floor(diffInHours / 24);
   return `${diffInDays}d ago`;
 }
@@ -122,13 +122,13 @@ function getInitials(name: string): string {
 
 export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
   const { data: session } = useSession();
-  
+
   // Use simplified real-time data hook (REST-based, no WebSocket errors)
-  const { 
-    isConnected, 
-    userLocations, 
-    connectedUsers, 
-    updateLocation, 
+  const {
+    isConnected,
+    userLocations,
+    connectedUsers,
+    updateLocation,
     error: socketError,
     reconnecting,
     refreshData
@@ -169,7 +169,7 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
         async (position) => {
           const { latitude, longitude } = position.coords;
           setUserLocation([latitude, longitude]);
-          
+
           // Center map on user location
           if (mapRef.current) {
             mapRef.current.setView([latitude, longitude], 10);
@@ -178,20 +178,20 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
           // Update location with reverse geocoding
           try {
             let locationData;
-            
+
             // Try to get actual location data using reverse geocoding
             try {
               const reverseGeoResponse = await fetch(
                 `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
               );
-              
+
               if (reverseGeoResponse.ok) {
                 const geoData = await reverseGeoResponse.json();
                 locationData = {
                   coordinates: { latitude, longitude },
                   address: {
                     city: geoData.city || geoData.locality || geoData.principalSubdivision || "Unknown City",
-                    country: geoData.countryName || "Unknown Country", 
+                    country: geoData.countryName || "Unknown Country",
                     countryCode: geoData.countryCode || "XX"
                   },
                   accuracy: position.coords.accuracy
@@ -213,7 +213,7 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
 
             // Use the updateLocation method from current hook (WebSocket or fallback)
             await updateLocation(locationData);
-            
+
             console.log('Location updated successfully:', locationData);
           } catch (error) {
             console.error('Failed to update location:', error);
@@ -241,13 +241,13 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
     const userLocation = userLocations.find(ul => ul.userId === userId);
     if (userLocation && mapRef.current) {
       const coords = userLocation.location.coordinates;
-      const position: [number, number] = Array.isArray(coords) 
+      const position: [number, number] = Array.isArray(coords)
         ? [coords[0], coords[1]]
         : [(coords as any).latitude, (coords as any).longitude];
-      
+
       mapRef.current.setView(position, 8);
       setSelectedUser(userId);
-      
+
       // Clear selection after 3 seconds
       setTimeout(() => setSelectedUser(null), 3000);
     }
@@ -256,7 +256,7 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
   const getMarkerColor = (userLocation: UserLocation) => {
     if (userLocation.userId === selectedUser) return "#f59e0b"; // amber for selected
     if (!userLocation.isOnline) return "#6b7280"; // gray for offline
-    
+
     // Different colors based on continent/region
     const continent = getContinent(userLocation.location.coordinates);
     const colors = {
@@ -290,7 +290,7 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
     if (lat > 9.5 && lat < 10.0 && lng > 118.5 && lng < 119.0) {
       return { city: "Puerto Princesa", country: "Philippines", countryCode: "PH" };
     }
-    
+
     // General region detection
     if (lat > 30 && lng > -130 && lng < -60) {
       return { city: "North America", country: "United States", countryCode: "US" };
@@ -304,24 +304,24 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
     if (lat < -10 && lng > 110 && lng < 180) {
       return { city: "Australia", country: "Australia", countryCode: "AU" };
     }
-    
-    return { 
-      city: `${lat.toFixed(2)}°, ${lng.toFixed(2)}°`, 
-      country: "Unknown Region", 
-      countryCode: "XX" 
+
+    return {
+      city: `${lat.toFixed(2)}°, ${lng.toFixed(2)}°`,
+      country: "Unknown Region",
+      countryCode: "XX"
     };
   };
 
   const getContinent = (coordinates: [number, number] | { latitude: number; longitude: number }): string => {
     let lat: number, lng: number;
-    
+
     if (Array.isArray(coordinates)) {
       [lat, lng] = coordinates;
     } else {
       lat = coordinates.latitude;
       lng = coordinates.longitude;
     }
-    
+
     if (lat > 30 && lng > -130 && lng < -60) return 'North America';
     if (lat > 35 && lng > -10 && lng < 70) return 'Europe';
     if (lat > 10 && lng > 70 && lng < 180) return 'Asia';
@@ -329,8 +329,8 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
     return 'Default';
   };
 
-  const filteredLocations = filterOnlineOnly 
-    ? userLocations.filter(ul => ul.isOnline) 
+  const filteredLocations = filterOnlineOnly
+    ? userLocations.filter(ul => ul.isOnline)
     : userLocations;
 
   return (
@@ -351,36 +351,36 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          
+
           {/* Smart Positioned User Markers */}
           {(() => {
             // Group users by location to handle overlaps
-            const positionedUsers = [];
-            const processed = new Set();
-            
+            const positionedUsers: Array<UserLocation & { adjustedPosition: [number, number] }> = [];
+            const processed = new Set<string>();
+
             filteredLocations.forEach((userLocation, index) => {
               if (processed.has(userLocation.userId)) return;
-              
+
               const coords = userLocation.location.coordinates;
-              const basePosition: [number, number] = Array.isArray(coords) 
+              const basePosition: [number, number] = Array.isArray(coords)
                 ? [coords[0], coords[1]]
                 : [(coords as any).latitude, (coords as any).longitude];
-              
+
               // Find other users at the same location (within 100m)
               const sameLocationUsers = filteredLocations.filter((other, otherIndex) => {
                 if (otherIndex === index || processed.has(other.userId)) return false;
-                
+
                 const otherCoords = other.location.coordinates;
-                const otherPosition: [number, number] = Array.isArray(otherCoords) 
+                const otherPosition: [number, number] = Array.isArray(otherCoords)
                   ? [otherCoords[0], otherCoords[1]]
                   : [(otherCoords as any).latitude, (otherCoords as any).longitude];
-                
+
                 // Check if within ~100m (0.001 degrees ≈ 100m)
                 const latDiff = Math.abs(basePosition[0] - otherPosition[0]);
                 const lngDiff = Math.abs(basePosition[1] - otherPosition[1]);
                 return latDiff < 0.001 && lngDiff < 0.001;
               });
-              
+
               if (sameLocationUsers.length === 0) {
                 // Single user at this location
                 positionedUsers.push({
@@ -392,16 +392,16 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
                 // Multiple users - arrange in circle
                 const allUsers = [userLocation, ...sameLocationUsers];
                 const radius = 0.0008; // Small offset in degrees
-                
+
                 allUsers.forEach((user, i) => {
                   const angle = (2 * Math.PI * i) / allUsers.length;
                   const offsetLat = Math.sin(angle) * radius;
                   const offsetLng = Math.cos(angle) * radius;
-                  
+
                   positionedUsers.push({
                     ...user,
                     adjustedPosition: [
-                      basePosition[0] + offsetLat, 
+                      basePosition[0] + offsetLat,
                       basePosition[1] + offsetLng
                     ] as [number, number]
                   });
@@ -409,13 +409,13 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
                 });
               }
             });
-            
+
             return positionedUsers.map((userLocation) => (
               <Marker
                 key={userLocation.userId}
                 position={userLocation.adjustedPosition}
                 icon={createUserMarkerIcon(
-                  userLocation.isOnline, 
+                  userLocation.isOnline,
                   getInitials(userLocation.userName),
                   getMarkerColor(userLocation),
                   userLocation.userAvatar
@@ -430,11 +430,11 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
                       <div className="relative">
                         {userLocation.userAvatar ? (
                           <>
-                            <img 
-                              src={userLocation.userAvatar} 
+                            <img
+                              src={userLocation.userAvatar}
                               alt={userLocation.userName}
                               className="h-12 w-12 rounded-full object-cover border-2 border-white shadow-md"
-                              style={{ 
+                              style={{
                                 borderRadius: '50%',
                                 width: '48px',
                                 height: '48px',
@@ -448,7 +448,7 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
                         ) : (
                           <>
                             <div className="h-12 w-12 rounded-full flex items-center justify-center font-medium text-white text-sm"
-                                 style={{ backgroundColor: getMarkerColor(userLocation) }}>
+                              style={{ backgroundColor: getMarkerColor(userLocation) }}>
                               {getInitials(userLocation.userName)}
                             </div>
                             {userLocation.isOnline && (
@@ -459,15 +459,15 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-sm">{userLocation.userName}</p>
-                        <Badge 
-                          variant={userLocation.isOnline ? "default" : "secondary"} 
+                        <Badge
+                          variant={userLocation.isOnline ? "default" : "secondary"}
                           className="text-xs mt-1"
                         >
                           {userLocation.isOnline ? "🟢 Online" : "⚫ Away"}
                         </Badge>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2 border-t pt-2">
                       <div className="flex items-center gap-2">
                         <MapPin className="h-3 w-3 text-muted-foreground" />
@@ -498,7 +498,7 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
 
           {/* User's current location */}
           {userLocation && (
-            <Marker 
+            <Marker
               position={userLocation}
               icon={createCurrentUserMarkerIcon()}
             >
@@ -522,7 +522,7 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
       </div>
 
       {/* Enhanced Map Controls */}
-      <div className="absolute top-4 right-4 z-[1000]">
+      <div className="absolute top-4 right-4 z-1000">
         <MapControls
           onRefresh={handleRefresh}
           onLocate={getUserLocation}
@@ -534,7 +534,7 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
 
       {/* Filter Status */}
       {filterOnlineOnly && (
-        <div className="absolute top-4 left-4 z-[1100]">
+        <div className="absolute top-4 left-4 z-1100">
           <Card className="bg-blue-50 border-blue-200 dark:bg-blue-950 dark:border-blue-800 shadow-lg">
             <CardContent className="p-2 flex items-center gap-2">
               <Filter className="h-3 w-3 text-blue-600 dark:text-blue-400" />
@@ -556,15 +556,15 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
 
       {/* Error Status */}
       {socketError && (
-        <div className="absolute bottom-28 left-4 right-4 z-[1100]">
+        <div className="absolute bottom-28 left-4 right-4 z-1100">
           <Card className="bg-red-50 border-red-200 dark:bg-red-950 dark:border-red-800 shadow-lg">
             <CardContent className="p-3">
               <p className="text-sm text-red-600 dark:text-red-400">
                 ⚠️ {socketError}
               </p>
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => window.location.reload()}
                 className="mt-2"
               >
@@ -576,7 +576,7 @@ export function RealTimeMap({ selectedUserId }: RealTimeMapProps) {
       )}
 
       {/* Bottom Stats - User information only */}
-      <div className="absolute bottom-4 left-4 right-4 z-[1100]">
+      <div className="absolute bottom-4 left-4 right-4 z-1100">
         <Card className="bg-background/95 backdrop-blur border shadow-lg">
           <CardContent className="p-3">
             <div className="flex items-center justify-between text-sm">
