@@ -2,7 +2,7 @@
 export interface Location {
   id: string;
   userId: string;
-  coordinates: {
+  coordinates: [number, number] | {
     latitude: number;
     longitude: number;
   };

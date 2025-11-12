@@ -78,7 +78,12 @@ function arrangeOverlappingMarkers(userLocations: UserLocation[]): UserLocation[
           ...user,
           location: {
             ...user.location,
-            coordinates: [position[0] + offsetLat, position[1] + offsetLng] as [number, number]
+            coordinates: Array.isArray(user.location.coordinates) 
+              ? [position[0] + offsetLat, position[1] + offsetLng] as [number, number]
+              : {
+                  latitude: position[0] + offsetLat,
+                  longitude: position[1] + offsetLng
+                }
           }
         };
         

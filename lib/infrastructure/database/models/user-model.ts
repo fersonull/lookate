@@ -19,6 +19,7 @@ const UserSchema = new Schema<IUser>(
       unique: true,
       lowercase: true,
       trim: true,
+      index: true,
     },
     name: {
       type: String,
@@ -40,7 +41,6 @@ const UserSchema = new Schema<IUser>(
 );
 
 // Indexes for performance
-UserSchema.index({ email: 1 });
 UserSchema.index({ createdAt: -1 });
 
 export const UserModel = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
