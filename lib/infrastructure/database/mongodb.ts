@@ -13,8 +13,14 @@ declare global {
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
+  console.error("Environment variables:", { 
+    NODE_ENV: process.env.NODE_ENV,
+    hasMongoUri: !!process.env.MONGODB_URI 
+  });
   throw new Error("Please define the MONGODB_URI environment variable inside .env.local");
 }
+
+console.log("MongoDB URI found:", MONGODB_URI.substring(0, 50) + "...");
 
 let cached = global.mongodb || { conn: null, promise: null };
 
