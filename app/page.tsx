@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { WelcomeScreen } from "@/components/welcome/welcome-screen";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
+import { MobileSidebar } from "@/components/layout/mobile-sidebar";
 import { MapPlaceholder } from "@/components/map/map-placeholder";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
@@ -37,10 +38,20 @@ export default function Home() {
     <div className="flex h-screen flex-col">
       <Header />
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar onUserSelect={setSelectedUserId} />
-        <main className="flex-1 p-6">
+        {/* Desktop: Sidebar always visible, Mobile: Hidden by default */}
+        <div className="hidden lg:block w-80 flex-shrink-0">
+          <Sidebar onUserSelect={setSelectedUserId} />
+        </div>
+        
+        {/* Main content area - responsive padding and spacing */}
+        <main className="flex-1 p-1 sm:p-2 md:p-4 lg:p-6 relative min-w-0">
           <div className="h-full">
             <MapPlaceholder selectedUserId={selectedUserId} />
+          </div>
+          
+          {/* Mobile sidebar toggle - visible on tablets and phones */}
+          <div className="lg:hidden">
+            <MobileSidebar onUserSelect={setSelectedUserId} />
           </div>
         </main>
       </div>

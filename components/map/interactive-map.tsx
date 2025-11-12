@@ -129,44 +129,45 @@ function MapControls({ onRefresh, onLocate, onFilter, isRefreshing }: {
   isRefreshing: boolean;
 }) {
   return (
-    <div className="absolute top-4 right-4 flex flex-col gap-2 z-[1000]">
-      <Card className="p-2">
-        <CardContent className="p-0 flex items-center gap-2">
-          <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-          <span className="text-xs font-medium">Live Updates</span>
+    <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex flex-col gap-1 sm:gap-2 z-[1000]">
+      <Card className="p-1 sm:p-2">
+        <CardContent className="p-0 flex items-center gap-1 sm:gap-2">
+          <div className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-green-500 animate-pulse"></div>
+          <span className="text-xs font-medium hidden sm:inline">Live Updates</span>
+          <span className="text-xs font-medium sm:hidden">Live</span>
         </CardContent>
       </Card>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-0.5 sm:gap-1">
         <Button
           variant="outline"
           size="sm"
           onClick={onRefresh}
           disabled={isRefreshing}
-          className="h-8 w-8 p-0 bg-background/90 backdrop-blur"
+          className="h-7 w-7 sm:h-8 sm:w-8 p-0 bg-background/90 backdrop-blur"
           title="Refresh user locations"
         >
-          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
         </Button>
 
         <Button
           variant="outline"
           size="sm"
           onClick={onLocate}
-          className="h-8 w-8 p-0 bg-background/90 backdrop-blur"
+          className="h-7 w-7 sm:h-8 sm:w-8 p-0 bg-background/90 backdrop-blur"
           title="Find my location"
         >
-          <Locate className="h-4 w-4" />
+          <Locate className="h-3 w-3 sm:h-4 sm:w-4" />
         </Button>
 
         <Button
           variant="outline"
           size="sm"
           onClick={onFilter}
-          className="h-8 w-8 p-0 bg-background/90 backdrop-blur"
+          className="h-7 w-7 sm:h-8 sm:w-8 p-0 bg-background/90 backdrop-blur"
           title="Filter users"
         >
-          <Filter className="h-4 w-4" />
+          <Filter className="h-3 w-3 sm:h-4 sm:w-4" />
         </Button>
       </div>
     </div>
@@ -411,14 +412,15 @@ export function InteractiveMap({ selectedUserId }: InteractiveMapProps) {
         isRefreshing={isRefreshing}
       />
 
-      {/* Filter Status */}
+      {/* Filter Status - responsive positioning */}
       {filterOnlineOnly && (
-        <div className="absolute top-4 left-4 z-[1000]">
+        <div className="absolute top-2 left-2 sm:top-4 sm:left-4 z-[1000]">
           <Card className="bg-blue-50 border-blue-200 dark:bg-blue-950 dark:border-blue-800">
-            <CardContent className="p-2 flex items-center gap-2">
+            <CardContent className="p-1 sm:p-2 flex items-center gap-1 sm:gap-2">
               <Filter className="h-3 w-3 text-blue-600 dark:text-blue-400" />
               <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
-                Showing online users only
+                <span className="hidden sm:inline">Showing online users only</span>
+                <span className="sm:hidden">Online only</span>
               </span>
               <Button
                 variant="ghost"
@@ -433,44 +435,44 @@ export function InteractiveMap({ selectedUserId }: InteractiveMapProps) {
         </div>
       )}
 
-      {/* Bottom Stats */}
-      <div className="absolute bottom-4 left-4 right-4">
+      {/* Bottom Stats - responsive layout */}
+      <div className="absolute bottom-2 left-2 right-2 sm:bottom-4 sm:left-4 sm:right-4">
         <Card className="bg-background/90 backdrop-blur">
-          <CardContent className="p-3">
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+          <CardContent className="p-2 sm:p-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 text-xs sm:text-sm">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs">
                     {activeUsers.length} Online
                   </Badge>
-                  <span className="text-muted-foreground">
+                  <span className="text-muted-foreground text-xs">
                     • {filterOnlineOnly ? filteredUsers.length : users.length} {filterOnlineOnly ? 'Shown' : 'Total'}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  <span className="text-muted-foreground">
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="text-muted-foreground text-xs">
                     {new Set(filteredUsers.map(u => u.location.country)).size} Countries
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="hidden sm:flex items-center gap-2">
                   <div 
-                    className="w-3 h-3 rounded-full"
+                    className="w-2 h-2 sm:w-3 sm:h-3 rounded-full"
                     style={{ backgroundColor: '#ef4444' }}
                   />
                   <div 
-                    className="w-3 h-3 rounded-full"
+                    className="w-2 h-2 sm:w-3 sm:h-3 rounded-full"
                     style={{ backgroundColor: '#3b82f6' }}
                   />
                   <div 
-                    className="w-3 h-3 rounded-full"
+                    className="w-2 h-2 sm:w-3 sm:h-3 rounded-full"
                     style={{ backgroundColor: '#10b981' }}
                   />
                   <span className="text-xs text-muted-foreground">Regions</span>
                 </div>
               </div>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground hidden sm:inline">
                 Live updates • Click markers to focus
               </span>
             </div>

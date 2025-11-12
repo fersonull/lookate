@@ -170,30 +170,31 @@ export function MapPlaceholder({ selectedUserId }: MapPlaceholderProps) {
         </div>
       </div>
 
-      {/* Map Controls Overlay */}
-      <div className="absolute top-4 right-4 flex flex-col gap-2">
-        <Card className="p-2">
-          <CardContent className="p-0 flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-            <span className="text-xs font-medium">Live Updates</span>
+      {/* Map Controls Overlay - responsive positioning */}
+      <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex flex-col gap-1 sm:gap-2">
+        <Card className="p-1 sm:p-2">
+          <CardContent className="p-0 flex items-center gap-1 sm:gap-2">
+            <div className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-green-500 animate-pulse"></div>
+            <span className="text-xs font-medium hidden sm:inline">Live Updates</span>
+            <span className="text-xs font-medium sm:hidden">Live</span>
           </CardContent>
         </Card>
       </div>
 
-      {/* Bottom Info */}
-      <div className="absolute bottom-4 left-4 right-4">
+      {/* Bottom Info - responsive layout */}
+      <div className="absolute bottom-2 left-2 right-2 sm:bottom-4 sm:left-4 sm:right-4">
         <Card className="bg-background/90 backdrop-blur">
-          <CardContent className="p-3">
-            <div className="flex items-center justify-between text-sm">
+          <CardContent className="p-2 sm:p-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 text-xs sm:text-sm">
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs">
                   Real-time
                 </Badge>
-                <span className="text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                   Showing {mockUserLocations.length} active users
                 </span>
               </div>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground hidden sm:inline">
                 Updates every 30 seconds
               </span>
             </div>

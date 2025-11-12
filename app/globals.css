@@ -175,3 +175,37 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Additional responsive utilities */
+@layer utilities {
+  /* Ensure proper mobile viewport */
+  .mobile-viewport {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  
+  /* Better text scaling for mobile */
+  .text-responsive {
+    @apply text-sm sm:text-base lg:text-lg;
+  }
+  
+  /* Responsive containers */
+  .container-responsive {
+    @apply px-2 sm:px-4 lg:px-6;
+  }
+  
+  /* Mobile-first button sizing */
+  .btn-responsive {
+    @apply text-sm sm:text-base px-3 py-2 sm:px-4 sm:py-2.5;
+  }
+  
+  /* Touch-friendly interactive elements */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  /* Responsive grid gaps */
+  .grid-responsive {
+    @apply gap-2 sm:gap-4 lg:gap-6;
+  }
+}

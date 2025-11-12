@@ -117,23 +117,23 @@ export function Sidebar({ className, onUserSelect }: SidebarProps) {
     return () => clearInterval(interval);
   }, []);
   return (
-    <div className={cn("w-80 border-r bg-muted/50 relative z-[100]", className)}>
+    <div className={cn("w-full h-full border-r bg-muted/50 relative z-[100]", className)}>
       <div className="flex h-full flex-col">
-        {/* Stats Card */}
-        <div className="p-4">
+        {/* Stats Card - responsive padding */}
+        <div className="p-2 sm:p-3 lg:p-4">
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Users className="h-4 w-4" />
+            <CardHeader className="pb-2 sm:pb-3">
+              <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                <Users className="h-3 w-3 sm:h-4 sm:w-4" />
                 Active Users
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs">
                   {activeUsers.filter(u => u.isOnline).length} Online
                 </Badge>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-xs sm:text-sm text-muted-foreground">
                   • {activeUsers.length} Total
                 </span>
               </div>
@@ -141,8 +141,8 @@ export function Sidebar({ className, onUserSelect }: SidebarProps) {
           </Card>
         </div>
 
-        {/* User List */}
-        <div className="flex-1 overflow-auto px-4 pb-4">
+        {/* User List - responsive padding */}
+        <div className="flex-1 overflow-auto px-2 sm:px-3 lg:px-4 pb-2 sm:pb-3 lg:pb-4">
           {isLoading ? (
             <div className="space-y-2">
               {[1, 2, 3].map((i) => (
@@ -176,44 +176,44 @@ export function Sidebar({ className, onUserSelect }: SidebarProps) {
               </p>
             </Card>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-1 sm:space-y-2">
               {activeUsers.map((user) => (
               <Card 
                 key={user.id} 
-                className="p-3 transition-colors hover:bg-accent cursor-pointer"
+                className="p-2 sm:p-3 transition-colors hover:bg-accent cursor-pointer"
                 onClick={() => onUserSelect?.(user.id)}
               >
-                <div className="flex items-start gap-3">
-                  <div className="relative">
-                    <Avatar className="h-10 w-10">
+                <div className="flex items-start gap-2 sm:gap-3">
+                  <div className="relative flex-shrink-0">
+                    <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
                       <AvatarImage src={user.avatar} alt={user.name} />
-                      <AvatarFallback className="text-sm">
+                      <AvatarFallback className="text-xs sm:text-sm">
                         {getInitials(user.name)}
                       </AvatarFallback>
                     </Avatar>
                     {user.isOnline && (
-                      <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 ring-2 ring-background" />
+                      <div className="absolute -bottom-0.5 -right-0.5 h-2 w-2 sm:h-3 sm:w-3 rounded-full bg-green-500 ring-1 sm:ring-2 ring-background" />
                     )}
                   </div>
                   
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium truncate">{user.name}</p>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs sm:text-sm font-medium truncate">{user.name}</p>
                       <Badge 
                         variant={user.isOnline ? "default" : "secondary"}
-                        className="text-xs"
+                        className="text-xs flex-shrink-0"
                       >
                         {user.isOnline ? "Online" : "Away"}
                       </Badge>
                     </div>
                     
                     <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
-                      <MapPin className="h-3 w-3" />
+                      <MapPin className="h-3 w-3 flex-shrink-0" />
                       <span className="truncate">{user.location.city}, {user.location.country}</span>
                     </div>
                     
                     <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
-                      <Clock className="h-3 w-3" />
+                      <Clock className="h-3 w-3 flex-shrink-0" />
                       <span>Last seen {getTimeAgo(user.lastSeen)}</span>
                     </div>
                   </div>

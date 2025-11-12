@@ -43,37 +43,37 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-[9999] w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        {/* Logo and App Name */}
-        <div className="flex items-center gap-2">
-          <MapPin className="h-6 w-6 text-primary" />
-          <h1 className="text-xl font-bold">lookate</h1>
+      <div className="container mx-auto flex h-12 sm:h-14 md:h-16 items-center justify-between px-2 sm:px-3 md:px-4">
+        {/* Logo and App Name - responsive sizing */}
+        <div className="flex items-center gap-1 sm:gap-2">
+          <MapPin className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary" />
+          <h1 className="text-base sm:text-lg md:text-xl font-bold truncate">lookate</h1>
         </div>
 
-        {/* Right side - Theme toggle and User menu */}
-        <div className="flex items-center gap-4">
-          {/* Theme Toggle */}
+        {/* Right side - Theme toggle and User menu - responsive spacing */}
+        <div className="flex items-center gap-1 sm:gap-2 md:gap-4">
+          {/* Theme Toggle - responsive sizing */}
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleDarkMode}
-            className="h-9 w-9"
+            className="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9"
           >
             {isDarkMode ? (
-              <Sun className="h-4 w-4" />
+              <Sun className="h-3 w-3 sm:h-4 sm:w-4" />
             ) : (
-              <Moon className="h-4 w-4" />
+              <Moon className="h-3 w-3 sm:h-4 sm:w-4" />
             )}
           </Button>
 
-          {/* User Menu */}
+          {/* User Menu - responsive avatar sizing */}
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                  <Avatar className="h-9 w-9">
+                <Button variant="ghost" className="relative h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9 rounded-full">
+                  <Avatar className="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9">
                     <AvatarImage src={user.avatar || ""} alt={user.name} />
-                    <AvatarFallback>{user.initials}</AvatarFallback>
+                    <AvatarFallback className="text-xs">{user.initials}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
